@@ -45,58 +45,6 @@ body{
 
   <div class="row g-3">
 
-    <!-- Docs -->
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-body">
-          <h6 class="fw-semibold">Juicebox docs + tutorial</h6>
-          <p class="text-muted small mb-3">
-            Start here for how to navigate, load maps, and work with annotations & tracks.
-          </p>
-
-          <div class="d-flex gap-2 flex-wrap">
-            <a class="btn btn-primary btn-sm btn-pill"
-               target="_blank"
-               href="https://aidenlab.gitbook.io/juicebox/">
-              Juicebox GitBook
-            </a>
-
-            <a class="btn btn-outline-secondary btn-sm btn-pill"
-               target="_blank"
-               href="https://github.com/aidenlab/Juicebox/wiki">
-              Juicebox Wiki
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
-    <!-- Repo -->
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-body">
-          <h6 class="fw-semibold">JuiceboxGUI repository</h6>
-          <p class="text-muted small mb-3">
-            Code, releases, and development context for the desktop GUI.
-          </p>
-
-          <div class="d-flex gap-2 flex-wrap">
-            <a class="btn btn-primary btn-sm btn-pill"
-               target="_blank"
-               href="https://github.com/aidenlab/juiceboxgui">
-              Open repo
-            </a>
-
-            <button class="btn btn-outline-secondary btn-sm btn-pill"
-                    onclick="copyRepos()">
-              Copy repo links
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
 
     <!-- Videos -->
     <div class="col-12">
@@ -111,67 +59,80 @@ body{
 
             <a class="btn btn-primary btn-sm btn-pill"
                target="_blank"
-               href="https://www.youtube.com/watch?v=7aCefRl168Q">
-               Video 1
+               href="https://www.youtube.com/watch?v=bPjQynxMZ4w">
+               Intro to 3D Genomics
             </a>
 
-            <a class="btn btn-outline-secondary btn-sm btn-pill"
+            <a class="btn btn-primary btn-sm btn-pill"
+               target="_blank"
+               href="https://www.youtube.com/watch?v=7aCefRl168Q">
+               Juicebox Hands-on Session
+            </a>
+
+            <a class="btn btn-primary btn-sm btn-pill"
                target="_blank"
                href="https://www.youtube.com/watch?v=xA6CLsG_GAs&list=PL5TJz0jgyQyNLGwt9NBUIUjPlHyDHWYO6">
-               Playlist
+               Juicebox on the Web Tutorial
             </a>
 
-            <a class="btn btn-outline-secondary btn-sm btn-pill"
-               target="_blank"
-               href="https://www.youtube.com/watch?v=bPjQynxMZ4w">
-               Video 3
-            </a>
-
-            <a class="btn btn-outline-secondary btn-sm btn-pill"
+            <a class="btn btn-primary btn-sm btn-pill"
                target="_blank"
                href="https://www.youtube.com/watch?v=dES-ozV65u4">
-               Video 4
+               Genome Origami
             </a>
 
-            <a class="btn btn-outline-secondary btn-sm btn-pill"
+            <a class="btn btn-primary btn-sm btn-pill"
                target="_blank"
                href="https://www.youtube.com/watch?v=Tn5qgEqWgW8">
-               Video 5
+               Loop Extrusion Model
             </a>
-
-            <button class="btn btn-outline-secondary btn-sm btn-pill"
-                    onclick="copyVideos()">
-               Copy video links
-            </button>
 
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Docs -->
+    <div class="col-12">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="fw-semibold">Juicebox docs + tutorial</h6>
+          <p class="text-muted small mb-3">
+            Start here for how to navigate, load maps, and work with annotations & tracks.
+          </p>
+
+          <div class="d-flex gap-2 flex-wrap">
+
+            <a class="btn btn-primary btn-sm btn-pill"
+               target="_blank"
+               href="https://aidenlab.gitbook.io/juicebox/">
+              GitBook
+            </a>
+
+            <a class="btn btn-primary btn-sm btn-pill"
+               target="_blank"
+               href="https://github.com/aidenlab/Juicebox/wiki">
+              Wiki
+            </a>
+
+            <a class="btn btn-primary btn-sm btn-pill"
+               target="_blank"
+               href="https://github.com/aidenlab/juiceboxgui">
+              Repo
+            </a>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+    
+
   </div>
 </div>
-
-
-<script>
-function copyRepos(){
-navigator.clipboard.writeText(
-`https://github.com/aidenlab/Juicebox/wiki
-https://github.com/aidenlab/juiceboxgui
-https://aidenlab.gitbook.io/juicebox/`
-);
-}
-
-function copyVideos(){
-navigator.clipboard.writeText(
-`https://www.youtube.com/watch?v=7aCefRl168Q
-https://www.youtube.com/watch?v=xA6CLsG_GAs&list=PL5TJz0jgyQyNLGwt9NBUIUjPlHyDHWYO6
-https://www.youtube.com/watch?v=bPjQynxMZ4w
-https://www.youtube.com/watch?v=dES-ozV65u4
-https://www.youtube.com/watch?v=Tn5qgEqWgW8`
-);
-}
-</script>
 
 </body>
 </html>
