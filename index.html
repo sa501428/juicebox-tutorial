@@ -1,0 +1,1254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>3D Genomics + Hi-C — A slick intro</title>
+  <meta name="description" content="A fully-contained, interactive single-page intro to 3D genomics and Hi-C, with link-out resources for Juicebox." />
+  <style>
+    :root{
+      --bg0:#06070c;
+      --bg1:#0b0f1d;
+      --card:rgba(255,255,255,.06);
+      --card2:rgba(255,255,255,.09);
+      --stroke:rgba(255,255,255,.10);
+      --stroke2:rgba(255,255,255,.16);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.70);
+      --muted2:rgba(255,255,255,.55);
+      --good:#7CFFB2;
+      --warn:#FFD37C;
+      --bad:#FF7C9C;
+      --accent:#8A7CFF;
+      --accent2:#7CD8FF;
+      --shadow: 0 18px 80px rgba(0,0,0,.55);
+      --shadow2: 0 12px 40px rgba(0,0,0,.40);
+      --radius: 22px;
+      --radius2: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:var(--sans);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(138,124,255,.18), transparent 55%),
+        radial-gradient(1000px 650px at 85% 20%, rgba(124,216,255,.16), transparent 55%),
+        radial-gradient(900px 600px at 65% 95%, rgba(124,255,178,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+    a{color:inherit}
+    .noise{
+      pointer-events:none;
+      position:fixed; inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+      opacity:.12;
+      mix-blend-mode:overlay;
+    }
+    .topbar{
+      position:sticky; top:0; z-index:30;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(10,12,22,.78), rgba(10,12,22,.38));
+      border-bottom:1px solid var(--stroke);
+    }
+    .wrap{max-width:1160px; margin:0 auto; padding:0 18px}
+    .nav{
+      display:flex; align-items:center; gap:14px;
+      padding:12px 0;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      min-width: 240px;
+    }
+    .logo{
+      width:34px; height:34px; border-radius:12px;
+      background:
+        radial-gradient(18px 18px at 30% 35%, rgba(255,255,255,.95), rgba(255,255,255,0) 70%),
+        radial-gradient(22px 22px at 80% 70%, rgba(124,216,255,.95), rgba(124,216,255,0) 70%),
+        radial-gradient(20px 20px at 25% 80%, rgba(138,124,255,.95), rgba(138,124,255,0) 70%),
+        rgba(255,255,255,.08);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.14);
+    }
+    .brand h1{
+      margin:0; font-size:14px; letter-spacing:.3px;
+      font-weight:700;
+      line-height:1.1;
+    }
+    .brand small{display:block; color:var(--muted2); font-weight:600; margin-top:2px}
+    .navlinks{
+      display:flex; gap:10px; flex:1; flex-wrap:wrap;
+      justify-content:center;
+    }
+    .chip{
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.05);
+      padding:9px 12px;
+      border-radius:999px;
+      color:var(--muted);
+      text-decoration:none;
+      font-size:12px;
+      font-weight:650;
+      transition:transform .2s ease, border-color .2s ease, background .2s ease;
+      user-select:none;
+      display:inline-flex; align-items:center; gap:8px;
+    }
+    .chip:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,.22);
+      background:rgba(255,255,255,.08);
+      color:rgba(255,255,255,.88);
+    }
+    .actions{display:flex; gap:10px; align-items:center; justify-content:flex-end; min-width:240px}
+    .btn{
+      border:1px solid var(--stroke2);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+      padding:10px 12px;
+      border-radius: 999px;
+      color: rgba(255,255,255,.92);
+      text-decoration:none;
+      font-size:12px;
+      font-weight:750;
+      letter-spacing:.2px;
+      display:inline-flex; align-items:center; gap:8px;
+      transition:transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+      box-shadow: 0 10px 30px rgba(0,0,0,.22);
+      cursor:pointer;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 16px 40px rgba(0,0,0,.32);
+      border-color: rgba(255,255,255,.28);
+    }
+    .btn.primary{
+      border-color: rgba(124,216,255,.35);
+      background:
+        radial-gradient(120px 60px at 30% 20%, rgba(124,216,255,.25), transparent 60%),
+        radial-gradient(120px 60px at 70% 90%, rgba(138,124,255,.25), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+    }
+
+    /* Hero */
+    header.hero{
+      position:relative;
+      padding:46px 0 18px;
+    }
+    .heroGrid{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:18px;
+      align-items:stretch;
+    }
+    .heroCard{
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    .heroCard:before{
+      content:"";
+      position:absolute; inset:-60px -80px auto -80px;
+      height:220px;
+      background:
+        radial-gradient(180px 120px at 30% 40%, rgba(124,216,255,.22), transparent 70%),
+        radial-gradient(180px 120px at 70% 40%, rgba(138,124,255,.20), transparent 70%),
+        radial-gradient(160px 120px at 50% 95%, rgba(124,255,178,.14), transparent 70%);
+      filter: blur(6px);
+      opacity:.95;
+      pointer-events:none;
+    }
+    .heroInner{padding:26px 22px 20px; position:relative; z-index:2}
+    .kicker{
+      display:inline-flex; align-items:center; gap:8px;
+      font-family:var(--mono);
+      font-size:12px;
+      color:rgba(255,255,255,.78);
+      padding:8px 10px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.05);
+      border-radius:999px;
+      user-select:none;
+    }
+    .kdot{
+      width:10px; height:10px; border-radius:99px;
+      background: radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,0) 60%), rgba(124,216,255,.95);
+      box-shadow: 0 0 0 4px rgba(124,216,255,.14);
+    }
+    .heroTitle{
+      margin:14px 0 10px;
+      font-size:44px;
+      line-height:1.05;
+      letter-spacing:-.7px;
+    }
+    .heroTitle span{
+      background: linear-gradient(90deg, rgba(124,216,255,.95), rgba(138,124,255,.95), rgba(124,255,178,.9));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
+    .heroSub{
+      margin:0 0 16px;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.6;
+      max-width: 64ch;
+    }
+    .heroCTA{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:16px}
+    .pillRow{
+      display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;
+    }
+    .pill{
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);
+      color:rgba(255,255,255,.75);
+      border-radius:999px;
+      padding:8px 10px;
+      font-size:12px;
+      font-weight:650;
+    }
+
+    /* Right panel */
+    .sideCard{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      display:flex; flex-direction:column;
+    }
+    .sideTop{
+      padding:18px 18px 12px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    }
+    .sideTop h3{margin:0; font-size:14px; letter-spacing:.2px}
+    .sideTop p{margin:6px 0 0; color:var(--muted2); font-size:12px; line-height:1.5}
+    .miniControls{
+      display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;
+    }
+    .toggle{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);
+      font-size:12px;
+      font-weight:700;
+      color:rgba(255,255,255,.82);
+      cursor:pointer;
+      user-select:none;
+      transition:transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+    .toggle:hover{transform:translateY(-1px); background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.20)}
+    .toggle .dot{
+      width:10px; height:10px; border-radius:99px;
+      background:rgba(255,255,255,.35);
+      box-shadow: 0 0 0 4px rgba(255,255,255,.08);
+    }
+    .toggle.on .dot{
+      background: rgba(124,255,178,.95);
+      box-shadow: 0 0 0 4px rgba(124,255,178,.14);
+    }
+    canvas#map{
+      width:100%;
+      height: 320px;
+      display:block;
+      background: radial-gradient(900px 300px at 20% 20%, rgba(124,216,255,.08), transparent 60%),
+                  radial-gradient(900px 300px at 80% 80%, rgba(138,124,255,.08), transparent 60%),
+                  rgba(0,0,0,.18);
+    }
+    .sideBottom{
+      padding:12px 14px 16px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .stat{
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      border-radius: 16px;
+      padding:10px 10px;
+      min-height:60px;
+    }
+    .stat .label{font-size:11px; color:var(--muted2); font-weight:700}
+    .stat .value{font-size:14px; font-weight:850; margin-top:6px}
+    .stat .hint{font-size:11px; color:rgba(255,255,255,.62); margin-top:4px; line-height:1.35}
+
+    /* Sections */
+    main{padding: 22px 0 70px}
+    section{
+      margin-top:18px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.04);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+    .secHead{
+      padding:18px 18px 12px;
+      display:flex; align-items:flex-end; justify-content:space-between; gap:12px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    }
+    .secHead h2{margin:0; font-size:16px; letter-spacing:.2px}
+    .secHead p{margin:6px 0 0; color:var(--muted2); font-size:12px; line-height:1.5; max-width: 76ch}
+    .secBody{padding:14px 18px 18px}
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    .card{
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      border-radius: var(--radius2);
+      padding:14px 14px;
+      position:relative;
+      overflow:hidden;
+      min-height: 120px;
+      transition: transform .2s ease, border-color .2s ease, background .2s ease;
+    }
+    .card:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,.20);
+      background:rgba(255,255,255,.06);
+    }
+    .card h3{margin:0 0 8px; font-size:13px; letter-spacing:.2px}
+    .card p{margin:0; color:var(--muted); font-size:12.5px; line-height:1.55}
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      font-family:var(--mono);
+      font-size:11px;
+      color:rgba(255,255,255,.80);
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);
+      padding:7px 9px;
+      border-radius: 999px;
+      margin-bottom:10px;
+    }
+    .spark{
+      width:10px; height:10px; border-radius:99px;
+      background: rgba(138,124,255,.95);
+      box-shadow: 0 0 0 4px rgba(138,124,255,.14);
+    }
+
+    /* Timeline */
+    .timeline{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    .step{
+      display:flex; gap:12px; align-items:flex-start;
+      padding:12px 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      border-radius: 16px;
+    }
+    .num{
+      width:34px; height:34px;
+      border-radius: 14px;
+      display:flex; align-items:center; justify-content:center;
+      font-family: var(--mono);
+      font-weight:900;
+      background: linear-gradient(180deg, rgba(124,216,255,.22), rgba(138,124,255,.16));
+      border:1px solid rgba(255,255,255,.16);
+      box-shadow: 0 12px 24px rgba(0,0,0,.25);
+      flex:0 0 auto;
+    }
+    .step h4{margin:2px 0 6px; font-size:13px}
+    .step p{margin:0; color:var(--muted); font-size:12.5px; line-height:1.55}
+
+    /* Resource buttons */
+    .resourceGrid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:12px;
+      align-items:stretch;
+    }
+    .resourceCard{
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      border-radius: var(--radius2);
+      padding:14px;
+      min-height: 170px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .resourceCard h3{margin:0; font-size:13px}
+    .resourceCard p{margin:6px 0 0; color:var(--muted); font-size:12.5px; line-height:1.55}
+    .btnRow{display:flex; gap:10px; flex-wrap:wrap}
+    .btn.small{padding:9px 11px; font-size:12px}
+    .btn.ghost{
+      background: rgba(255,255,255,.04);
+      border-color: rgba(255,255,255,.14);
+      box-shadow:none;
+    }
+    .btn.ghost:hover{box-shadow: 0 16px 40px rgba(0,0,0,.28)}
+
+    /* Quiz */
+    .quizGrid{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:12px;
+    }
+    .quizCard{
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      border-radius: var(--radius2);
+      padding:14px;
+    }
+    .qTitle{margin:0 0 10px; font-size:13px}
+    .qHint{margin:0 0 12px; color:var(--muted2); font-size:12px; line-height:1.5}
+    .opt{
+      width:100%;
+      text-align:left;
+      margin:8px 0;
+      padding:10px 10px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      color:rgba(255,255,255,.86);
+      font-weight:700;
+      cursor:pointer;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    }
+    .opt:hover{transform:translateY(-1px); border-color:rgba(255,255,255,.20); background:rgba(255,255,255,.06)}
+    .opt.good{border-color:rgba(124,255,178,.40); background:rgba(124,255,178,.10)}
+    .opt.bad{border-color:rgba(255,124,156,.40); background:rgba(255,124,156,.10)}
+    .result{
+      margin-top:10px;
+      font-size:12.5px;
+      color:var(--muted);
+      line-height:1.55;
+    }
+    .kbd{
+      font-family:var(--mono);
+      font-size:11px;
+      padding:2px 6px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(0,0,0,.18);
+      color:rgba(255,255,255,.86);
+    }
+
+    /* Footer */
+    footer{
+      padding:22px 0 28px;
+      color:rgba(255,255,255,.55);
+      font-size:12px;
+    }
+    .foot{
+      border-top:1px solid rgba(255,255,255,.10);
+      padding-top:18px;
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      flex-wrap:wrap;
+    }
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .heroGrid{grid-template-columns:1fr}
+      .actions{min-width:auto}
+      .brand{min-width:auto}
+      .nav{flex-wrap:wrap}
+      .navlinks{justify-content:flex-start}
+      .sideBottom{grid-template-columns:1fr 1fr}
+      .grid3{grid-template-columns:1fr}
+      .resourceGrid{grid-template-columns:1fr}
+      .quizGrid{grid-template-columns:1fr}
+    }
+    @media (max-width: 520px){
+      .heroTitle{font-size:36px}
+      .sideBottom{grid-template-columns:1fr}
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      *{scroll-behavior:auto !important; transition:none !important; animation:none !important}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="noise" aria-hidden="true"></div>
+
+  <div class="topbar">
+    <div class="wrap">
+      <div class="nav">
+        <div class="brand" role="banner" aria-label="Page brand">
+          <div class="logo" aria-hidden="true"></div>
+          <div>
+            <h1>Intro to <span style="color:rgba(255,255,255,.95)">3D Genomics</span> + Hi-C</h1>
+            <small>Concepts • intuition • Juicebox resources</small>
+          </div>
+        </div>
+
+        <nav class="navlinks" aria-label="Page navigation">
+          <a class="chip" href="#concepts" data-scroll>Concepts</a>
+          <a class="chip" href="#hic" data-scroll>Hi-C</a>
+          <a class="chip" href="#read" data-scroll>Reading a map</a>
+          <a class="chip" href="#workflow" data-scroll>Workflow</a>
+          <a class="chip" href="#resources" data-scroll>Resources</a>
+          <a class="chip" href="#quiz" data-scroll>Quick quiz</a>
+        </nav>
+
+        <div class="actions">
+          <button class="btn ghost" id="copyLink" title="Copy a shareable link">Copy link</button>
+          <button class="btn primary" id="jumpDemo" title="Jump to the interactive map">Open demo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="wrap">
+      <div class="heroGrid">
+        <div class="heroCard">
+          <div class="heroInner">
+            <div class="kicker"><span class="kdot" aria-hidden="true"></span> 3D genome organization, explained like you’re about to use it</div>
+            <h2 class="heroTitle">
+              From <span>contact maps</span> to loops, domains, and compartments.
+            </h2>
+            <p class="heroSub">
+              Hi-C measures how often pairs of genomic loci are near each other in 3D. The result is a matrix (a “contact map”)
+              that you can explore across resolutions—exactly what Juicebox was built for.
+            </p>
+
+            <div class="heroCTA">
+              <a class="btn primary" href="#resources" data-scroll>Get the Juicebox links</a>
+              <a class="btn ghost" href="#workflow" data-scroll>See the pipeline story</a>
+              <button class="btn ghost" id="randomize">Randomize demo map</button>
+            </div>
+
+            <div class="pillRow" aria-label="Key takeaways">
+              <div class="pill">Matrix = proximity over population</div>
+              <div class="pill">Zoom = resolution</div>
+              <div class="pill">Normalization changes contrast</div>
+              <div class="pill">Features: compartments • TADs • loops</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sideCard" id="demo">
+          <div class="sideTop">
+            <div>
+              <h3>Interactive “mini Hi-C map”</h3>
+              <p>Fake data, real intuition: zoom, normalization, and loop hotspots.</p>
+            </div>
+            <div class="miniControls">
+              <div class="toggle on" id="tglNorm" role="switch" aria-checked="true" tabindex="0">
+                <span class="dot" aria-hidden="true"></span> Normalize
+              </div>
+              <div class="toggle" id="tglLoops" role="switch" aria-checked="false" tabindex="0">
+                <span class="dot" aria-hidden="true"></span> Loops
+              </div>
+            </div>
+          </div>
+
+          <canvas id="map" width="900" height="520" aria-label="Simulated contact map canvas"></canvas>
+
+          <div class="sideBottom">
+            <div class="stat">
+              <div class="label">Zoom</div>
+              <div class="value"><span id="zoomLabel">100 kb</span></div>
+              <div class="hint">Smaller bin = finer structure</div>
+              <input id="zoom" type="range" min="0" max="4" value="2" style="width:100%; margin-top:10px">
+            </div>
+            <div class="stat">
+              <div class="label">Contrast</div>
+              <div class="value"><span id="contrastLabel">Balanced</span></div>
+              <div class="hint">Normalization “flattens” biases</div>
+              <input id="contrast" type="range" min="0" max="100" value="58" style="width:100%; margin-top:10px">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+
+      <section id="concepts">
+        <div class="secHead">
+          <div>
+            <h2>Core concepts in 3D genomics</h2>
+            <p>Think of chromosomes as polymers in a nucleus. Hi-C gives you a *population-average* proximity matrix, not a single structure.</p>
+          </div>
+          <div class="badge"><span class="spark" aria-hidden="true"></span> mental model</div>
+        </div>
+        <div class="secBody">
+          <div class="grid3">
+            <div class="card">
+              <div class="badge"><span class="spark" style="background:rgba(124,216,255,.95); box-shadow:0 0 0 4px rgba(124,216,255,.14)" aria-hidden="true"></span> Matrix</div>
+              <h3>Contact map</h3>
+              <p>
+                A square matrix where cell (i, j) reflects how often loci i and j were close enough to ligate.
+                The diagonal is strongest because nearby loci contact more often.
+              </p>
+            </div>
+            <div class="card">
+              <div class="badge"><span class="spark" style="background:rgba(138,124,255,.95); box-shadow:0 0 0 4px rgba(138,124,255,.14)" aria-hidden="true"></span> Scale</div>
+              <h3>Multi-resolution exploration</h3>
+              <p>
+                Large-scale patterns (compartments) appear at coarse resolution; finer resolution reveals domains and loops.
+                Zooming is the whole game.
+              </p>
+            </div>
+            <div class="card">
+              <div class="badge"><span class="spark" style="background:rgba(124,255,178,.95); box-shadow:0 0 0 4px rgba(124,255,178,.14)" aria-hidden="true"></span> Features</div>
+              <h3>Compartments, domains, loops</h3>
+              <p>
+                Compartments look like plaid/checker textures; domains are squares/triangles along the diagonal;
+                loops are bright focal dots off the diagonal.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="hic">
+        <div class="secHead">
+          <div>
+            <h2>What Hi-C measures (high-level)</h2>
+            <p>A biochemical proximity assay → sequencing reads → pairs of genomic coordinates → binned into a matrix.</p>
+          </div>
+          <div class="badge"><span class="spark" aria-hidden="true"></span> overview</div>
+        </div>
+        <div class="secBody">
+          <div class="timeline">
+            <div class="step">
+              <div class="num">1</div>
+              <div>
+                <h4>Crosslink + cut</h4>
+                <p>Fix chromatin interactions, digest DNA (restriction enzyme), leaving fragments that reflect 3D proximity.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="num">2</div>
+              <div>
+                <h4>Fill + ligate</h4>
+                <p>Fill ends and ligate so fragments that were near each other become joined (a chimeric junction).</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="num">3</div>
+              <div>
+                <h4>Sequence + map</h4>
+                <p>Paired-end reads are mapped to the genome, producing pairs of loci (i, j) for each contact.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="num">4</div>
+              <div>
+                <h4>Bin + normalize</h4>
+                <p>Bin contacts at a chosen resolution and optionally normalize to reduce technical biases before visualization.</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; color:var(--muted2); font-size:12px">
+            <span>Tip:</span>
+            <span>Use <span class="kbd">resolution</span> to match your question (compartments vs loops).</span>
+            <span>Use <span class="kbd">normalization</span> to compare regions fairly.</span>
+            <span>Remember <span class="kbd">distance decay</span> dominates near the diagonal.</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="read">
+        <div class="secHead">
+          <div>
+            <h2>How to read a contact map (fast intuition)</h2>
+            <p>Patterns map to biology, but also to scale. The same region can look “featureless” at one zoom and rich at another.</p>
+          </div>
+          <div class="badge"><span class="spark" aria-hidden="true"></span> interpretation</div>
+        </div>
+        <div class="secBody">
+          <div class="grid3">
+            <div class="card">
+              <h3>Diagonal + decay</h3>
+              <p>Contacts drop with genomic distance. Strong diagonal is expected; compare like-with-like distances when judging enrichment.</p>
+            </div>
+            <div class="card">
+              <h3>Domains (TAD-like)</h3>
+              <p>Squares/triangles along the diagonal suggest neighborhoods of elevated internal contact frequency.</p>
+            </div>
+            <div class="card">
+              <h3>Loops</h3>
+              <p>Bright puncta away from the diagonal often correspond to specific long-range interactions (e.g., CTCF/cohesin-mediated).</p>
+            </div>
+          </div>
+
+          <div style="margin-top:12px; padding:12px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.03); border-radius:16px">
+            <div style="display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap">
+              <div class="num" style="width:34px;height:34px">★</div>
+              <div style="flex:1; min-width:240px">
+                <div style="font-weight:850; font-size:13px; margin:2px 0 6px">A practical viewing loop</div>
+                <div style="color:var(--muted); font-size:12.5px; line-height:1.55">
+                  Start broad (Mb) to spot compartments and major rearrangements → zoom to 100–50 kb for domains →
+                  zoom to 10–5 kb (if coverage supports) for loops. Toggle normalization when comparing across regions or samples.
+                </div>
+              </div>
+              <button class="btn small ghost" id="focusDemo">Try this in the demo</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="workflow">
+        <div class="secHead">
+          <div>
+            <h2>Workflow mindset</h2>
+            <p>What you can do depends on coverage and resolution. Always match analysis scale to sequencing depth and biological question.</p>
+          </div>
+          <div class="badge"><span class="spark" aria-hidden="true"></span> practice</div>
+        </div>
+        <div class="secBody">
+          <div class="grid3">
+            <div class="card">
+              <h3>Choose resolution honestly</h3>
+              <p>If bins are too small for your depth, the map looks noisy and loops are unreliable. Coarser bins can be more informative.</p>
+            </div>
+            <div class="card">
+              <h3>Compare with intention</h3>
+              <p>When comparing conditions, keep preprocessing consistent and lean on normalization / distance-aware expectations.</p>
+            </div>
+            <div class="card">
+              <h3>Annotate what you see</h3>
+              <p>Use tracks (genes, ChIP-seq, peaks) and feature calls (loops/domains) to connect patterns to mechanism.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="resources">
+        <div class="secHead">
+          <div>
+            <h2>Juicebox + learning resources (link-out buttons)</h2>
+            <p>These buttons open the sources you listed in a new tab. Nothing is embedded.</p>
+          </div>
+          <div class="badge"><span class="spark" aria-hidden="true"></span> links</div>
+        </div>
+
+        <div class="secBody">
+          <div class="resourceGrid">
+            <div class="resourceCard">
+              <div>
+                <h3>Juicebox docs + tutorial</h3>
+                <p>Start here for how to navigate, load maps, and work with annotations & tracks.</p>
+              </div>
+              <div class="btnRow">
+                <a class="btn primary small" target="_blank" rel="noreferrer noopener"
+                   href="https://aidenlab.gitbook.io/juicebox/">Juicebox GitBook</a>
+                <a class="btn ghost small" target="_blank" rel="noreferrer noopener"
+                   href="https://github.com/aidenlab/Juicebox/wiki">Juicebox Wiki</a>
+              </div>
+            </div>
+
+            <div class="resourceCard">
+              <div>
+                <h3>JuiceboxGUI repository</h3>
+                <p>Code, releases, and development context for the desktop GUI.</p>
+              </div>
+              <div class="btnRow">
+                <a class="btn small primary" target="_blank" rel="noreferrer noopener"
+                   href="https://github.com/aidenlab/juiceboxgui">Open repo</a>
+                <button class="btn small ghost" id="copyRepos">Copy repo links</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div class="resourceCard" style="min-height:auto">
+            <div>
+              <h3>Video resources (YouTube)</h3>
+              <p>Quick ramps and deeper series—open in a new tab.</p>
+            </div>
+            <div class="btnRow">
+              <a class="btn small primary" target="_blank" rel="noreferrer noopener" href="https://www.youtube.com/watch?v=7aCefRl168Q">Video 1</a>
+              <a class="btn small ghost" target="_blank" rel="noreferrer noopener" href="https://www.youtube.com/watch?v=xA6CLsG_GAs&list=PL5TJz0jgyQyNLGwt9NBUIUjPlHyDHWYO6">Playlist</a>
+              <a class="btn small ghost" target="_blank" rel="noreferrer noopener" href="https://www.youtube.com/watch?v=bPjQynxMZ4w">Video 3</a>
+              <a class="btn small ghost" target="_blank" rel="noreferrer noopener" href="https://www.youtube.com/watch?v=dES-ozV65u4">Video 4</a>
+              <a class="btn small ghost" target="_blank" rel="noreferrer noopener" href="https://www.youtube.com/watch?v=Tn5qgEqWgW8">Video 5</a>
+              <button class="btn small ghost" id="copyVideos">Copy video links</button>
+            </div>
+          </div>
+
+          <div style="margin-top:12px; color:var(--muted2); font-size:12px; line-height:1.6">
+            Pro tip: keep this page open next to Juicebox. Use the demo above to rehearse the “zoom → interpret → annotate” loop,
+            then switch to a real dataset in Juicebox.
+          </div>
+        </div>
+      </section>
+
+      <section id="quiz">
+        <div class="secHead">
+          <div>
+            <h2>Quick quiz (30 seconds)</h2>
+            <p>Just to lock in the intuition. Click an option to reveal the explanation.</p>
+          </div>
+          <div class="badge"><span class="spark" aria-hidden="true"></span> check</div>
+        </div>
+        <div class="secBody">
+          <div class="quizGrid">
+            <div class="quizCard">
+              <div class="qTitle">In a Hi-C map, what does a bright dot off the diagonal usually suggest?</div>
+              <div class="qHint">Hint: it’s a specific interaction between two loci (not just distance decay).</div>
+              <button class="opt" data-correct="0">A loop / focal long-range contact</button>
+              <button class="opt" data-correct="1">Only sequencing depth</button>
+              <button class="opt" data-correct="1">A gene annotation track</button>
+              <div class="result" id="r1"></div>
+            </div>
+
+            <div class="quizCard">
+              <div class="qTitle">If you zoom to very small bins and everything becomes speckly/noisy, the safest move is…</div>
+              <div class="qHint">Hint: match resolution to coverage.</div>
+              <button class="opt" data-correct="0">Zoom out (coarser resolution) or increase smoothing</button>
+              <button class="opt" data-correct="1">Turn off the diagonal</button>
+              <button class="opt" data-correct="1">Assume you found micro-loops everywhere</button>
+              <div class="result" id="r2"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div class="wrap">
+          <div class="foot">
+            <div>Built as a single-file HTML/CSS/JS page — drop it anywhere.</div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+              <a class="chip" href="#top" data-scroll style="text-decoration:none">Back to top</a>
+              <span style="opacity:.55">Hotkeys: <span class="kbd">N</span> normalize, <span class="kbd">L</span> loops, <span class="kbd">R</span> randomize</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      // ---------- Smooth scroll ----------
+      const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      document.querySelectorAll("[data-scroll]").forEach(a => {
+        a.addEventListener("click", (e) => {
+          const href = a.getAttribute("href") || "";
+          if (!href.startsWith("#")) return;
+          const el = document.querySelector(href);
+          if (!el) return;
+          e.preventDefault();
+          el.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "start" });
+        });
+      });
+
+      // ---------- Copy link ----------
+      const copy = async (text) => {
+        try{
+          await navigator.clipboard.writeText(text);
+          toast("Copied to clipboard");
+        }catch(e){
+          // fallback
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+          toast("Copied to clipboard");
+        }
+      };
+
+      // ---------- Toast ----------
+      let toastTimer = null;
+      const toast = (msg) => {
+        let t = document.getElementById("toast");
+        if (!t){
+          t = document.createElement("div");
+          t.id = "toast";
+          t.style.position = "fixed";
+          t.style.left = "50%";
+          t.style.bottom = "18px";
+          t.style.transform = "translateX(-50%)";
+          t.style.zIndex = "50";
+          t.style.padding = "10px 12px";
+          t.style.borderRadius = "999px";
+          t.style.border = "1px solid rgba(255,255,255,.16)";
+          t.style.background = "rgba(10,12,22,.72)";
+          t.style.backdropFilter = "blur(10px)";
+          t.style.boxShadow = "0 18px 50px rgba(0,0,0,.45)";
+          t.style.color = "rgba(255,255,255,.9)";
+          t.style.fontWeight = "800";
+          t.style.fontSize = "12px";
+          t.style.letterSpacing = ".2px";
+          t.style.opacity = "0";
+          t.style.transition = "opacity .18s ease, transform .18s ease";
+          t.style.pointerEvents = "none";
+          document.body.appendChild(t);
+        }
+        t.textContent = msg;
+        t.style.opacity = "1";
+        t.style.transform = "translateX(-50%) translateY(-2px)";
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          t.style.opacity = "0";
+          t.style.transform = "translateX(-50%) translateY(0px)";
+        }, 1400);
+      };
+
+      document.getElementById("copyLink").addEventListener("click", () => {
+        copy(window.location.href);
+      });
+
+      document.getElementById("jumpDemo").addEventListener("click", () => {
+        document.getElementById("demo").scrollIntoView({behavior: prefersReduced ? "auto" : "smooth", block:"start"});
+      });
+
+      // ---------- Resource copy buttons ----------
+      document.getElementById("copyRepos").addEventListener("click", () => {
+        copy(
+`Juicebox Wiki: https://github.com/aidenlab/Juicebox/wiki
+JuiceboxGUI repo: https://github.com/aidenlab/juiceboxgui
+Juicebox GitBook: https://aidenlab.gitbook.io/juicebox/`
+        );
+      });
+      document.getElementById("copyVideos").addEventListener("click", () => {
+        copy(
+`YouTube links:
+https://www.youtube.com/watch?v=7aCefRl168Q
+https://www.youtube.com/watch?v=xA6CLsG_GAs&list=PL5TJz0jgyQyNLGwt9NBUIUjPlHyDHWYO6
+https://www.youtube.com/watch?v=bPjQynxMZ4w
+https://www.youtube.com/watch?v=dES-ozV65u4
+https://www.youtube.com/watch?v=Tn5qgEqWgW8`
+        );
+      });
+
+      // ---------- Mini contact map demo ----------
+      const canvas = document.getElementById("map");
+      const ctx = canvas.getContext("2d", {alpha: true});
+
+      const state = {
+        norm: true,
+        loops: false,
+        zoomIdx: 2,        // 0..4
+        contrast: 0.58,    // 0..1
+        seed: 1
+      };
+
+      const zoomLabels = ["1 Mb", "500 kb", "100 kb", "25 kb", "5 kb"];
+      const zoomBins   = [  36,     48,      72,     110,   160 ];
+
+      const rand = (seed) => {
+        // mulberry32
+        let t = seed >>> 0;
+        return () => {
+          t += 0x6D2B79F5;
+          let r = Math.imul(t ^ (t >>> 15), 1 | t);
+          r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+          return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+        };
+      };
+
+      const makeMap = () => {
+        const bins = zoomBins[state.zoomIdx];
+        const R = rand(state.seed);
+        // base: distance decay + compartments + domains + noise
+        const M = Array.from({length: bins}, () => new Float32Array(bins));
+        const compA = new Float32Array(bins);
+        for (let i=0;i<bins;i++){
+          // smooth compartment sign
+          const x = i / bins;
+          compA[i] = Math.sin((x*2.0 + 0.15) * Math.PI) + 0.45*Math.sin((x*6.0 + 0.33)*Math.PI);
+        }
+        // normalize comp to -1..1
+        let mn=1e9, mx=-1e9;
+        for (let i=0;i<bins;i++){ mn = Math.min(mn, compA[i]); mx = Math.max(mx, compA[i]); }
+        for (let i=0;i<bins;i++){ compA[i] = 2*(compA[i]-mn)/(mx-mn) - 1; }
+
+        // domain blocks along diagonal
+        const domains = [];
+        let p = 0;
+        while (p < bins){
+          const w = Math.max(8, Math.floor( (6 + 18*R()) * (0.9 + 0.35*R()) ));
+          domains.push([p, Math.min(bins-1, p+w)]);
+          p += w + Math.floor(2 + 6*R());
+        }
+
+        // loops list
+        const loops = [];
+        const loopCount = Math.floor(6 + 10*R());
+        for (let k=0;k<loopCount;k++){
+          const i = Math.floor(bins*R());
+          const j = Math.floor(bins*R());
+          if (Math.abs(i-j) < bins*0.08) continue; // avoid too close
+          loops.push([Math.min(i,j), Math.max(i,j), 0.7 + 0.6*R()]);
+        }
+
+        for (let i=0;i<bins;i++){
+          for (let j=i;j<bins;j++){
+            const d = Math.abs(i-j);
+            const distDecay = 1 / (1 + Math.pow(d, 1.10));
+            // compartments: same-sign boosts
+            const comp = (compA[i] * compA[j] > 0) ? 1.0 : 0.62;
+            // domain: if in same domain, boost near diagonal
+            let dom = 1.0;
+            for (let t=0;t<domains.length;t++){
+              const [a,b] = domains[t];
+              if (i>=a && i<=b && j>=a && j<=b){
+                dom = 1.35;
+                break;
+              }
+            }
+            // noise + subtle stripes
+            const stripe = 0.06*Math.sin((i*0.45 + j*0.11) * 0.35) + 0.06*Math.sin((i*0.08 - j*0.40) * 0.28);
+            const noise = (R()-0.5) * (0.20 + 0.35*Math.min(1, d/(bins*0.25)));
+
+            let v = distDecay * comp * dom + stripe + noise;
+
+            // add loops
+            for (let k=0;k<loops.length;k++){
+              const [a,b,inten] = loops[k];
+              const di = i-a, dj = j-b;
+              const g = Math.exp(-(di*di + dj*dj) / (2*Math.pow(1.2 + bins/120, 2)));
+              v += (state.loops ? 1.25 : 0.60) * inten * 0.8 * g;
+              // symmetric
+              const di2 = i-b, dj2 = j-a;
+              const g2 = Math.exp(-(di2*di2 + dj2*dj2) / (2*Math.pow(1.2 + bins/120, 2)));
+              v += (state.loops ? 1.25 : 0.60) * inten * 0.8 * g2;
+            }
+
+            // clamp
+            if (!isFinite(v)) v = 0;
+            v = Math.max(0, v);
+
+            M[i][j] = v;
+            M[j][i] = v;
+          }
+        }
+
+        // "normalization": balance rows/cols roughly
+        if (state.norm){
+          const row = new Float32Array(bins);
+          for (let i=0;i<bins;i++){
+            let s=0;
+            for (let j=0;j<bins;j++) s += M[i][j];
+            row[i] = s / bins;
+          }
+          const mean = row.reduce((a,b)=>a+b,0)/bins;
+          for (let i=0;i<bins;i++){
+            const fi = Math.sqrt((row[i] + 1e-6) / (mean + 1e-6));
+            for (let j=0;j<bins;j++){
+              const fj = Math.sqrt((row[j] + 1e-6) / (mean + 1e-6));
+              M[i][j] = M[i][j] / (fi*fj);
+            }
+          }
+        }
+
+        return {M, bins};
+      };
+
+      let mapCache = makeMap();
+
+      const draw = () => {
+        const {M, bins} = mapCache;
+
+        // fit to canvas pixels
+        const W = canvas.width, H = canvas.height;
+        ctx.clearRect(0,0,W,H);
+
+        // compute stats for scaling
+        let vmax = 0;
+        for (let i=0;i<bins;i++){
+          for (let j=0;j<bins;j++){
+            vmax = Math.max(vmax, M[i][j]);
+          }
+        }
+        const gamma = 0.55 + (1 - state.contrast) * 0.9; // lower contrast => flatter
+        const scale = 1 / (vmax + 1e-6);
+
+        const img = ctx.createImageData(W,H);
+        const data = img.data;
+
+        // render rotated-ish square contact map centered; for simplicity render full square
+        for (let y=0;y<H;y++){
+          const j = Math.floor((y / H) * bins);
+          for (let x=0;x<W;x++){
+            const i = Math.floor((x / W) * bins);
+            let v = M[i][j] * scale;
+            // contrast curve
+            v = Math.pow(Math.max(0, Math.min(1, v)), gamma);
+
+            // base palette: dark -> cyan/purple/green-ish via channel mixing
+            const r = 18 + Math.floor(210 * v * (0.55 + 0.45*Math.sin((i+j)*0.02)));
+            const g = 18 + Math.floor(220 * v * (0.55 + 0.45*Math.sin((i-j)*0.02 + 1.2)));
+            const b = 22 + Math.floor(240 * v);
+
+            const idx = (y*W + x) * 4;
+            data[idx+0] = r;
+            data[idx+1] = g;
+            data[idx+2] = b;
+            data[idx+3] = 255;
+          }
+        }
+        ctx.putImageData(img, 0, 0);
+
+        // subtle diagonal highlight
+        ctx.save();
+        ctx.globalAlpha = 0.18;
+        ctx.lineWidth = Math.max(1, Math.round(W/300));
+        ctx.strokeStyle = "rgba(255,255,255,.55)";
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.lineTo(W,H);
+        ctx.stroke();
+        ctx.restore();
+
+        // vignette
+        const grd = ctx.createRadialGradient(W*0.5, H*0.5, Math.min(W,H)*0.10, W*0.5, H*0.5, Math.min(W,H)*0.70);
+        grd.addColorStop(0, "rgba(0,0,0,0)");
+        grd.addColorStop(1, "rgba(0,0,0,.36)");
+        ctx.fillStyle = grd;
+        ctx.fillRect(0,0,W,H);
+      };
+
+      const syncLabels = () => {
+        document.getElementById("zoomLabel").textContent = zoomLabels[state.zoomIdx];
+        document.getElementById("contrastLabel").textContent = state.norm ? "Balanced" : "Raw-ish";
+      };
+
+      const rebuild = () => {
+        mapCache = makeMap();
+        syncLabels();
+        draw();
+        updateFeatureStats();
+      };
+
+      const updateFeatureStats = () => {
+        const bins = mapCache.bins;
+        const depth = Math.round( (bins*bins) / 1200 );
+        const feat = state.loops ? "Loops emphasized" : "Domains/compartments emphasized";
+        document.querySelector(".stat:nth-child(1) .hint").textContent = `Smaller bin = finer structure (${bins} bins)`;
+        document.querySelector(".stat:nth-child(2) .hint").textContent = `${feat} • simulated depth ~${depth}M`;
+      };
+
+      // toggles
+      const setToggle = (el, on) => {
+        el.classList.toggle("on", on);
+        el.setAttribute("aria-checked", on ? "true" : "false");
+      };
+
+      const tglNorm = document.getElementById("tglNorm");
+      const tglLoops = document.getElementById("tglLoops");
+
+      const flipNorm = () => {
+        state.norm = !state.norm;
+        setToggle(tglNorm, state.norm);
+        rebuild();
+        toast(state.norm ? "Normalization ON" : "Normalization OFF");
+      };
+      const flipLoops = () => {
+        state.loops = !state.loops;
+        setToggle(tglLoops, state.loops);
+        rebuild();
+        toast(state.loops ? "Loops ON" : "Loops OFF");
+      };
+
+      tglNorm.addEventListener("click", flipNorm);
+      tglLoops.addEventListener("click", flipLoops);
+      [tglNorm, tglLoops].forEach(el => {
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            el.click();
+          }
+        });
+      });
+
+      // sliders
+      const zoom = document.getElementById("zoom");
+      const contrast = document.getElementById("contrast");
+
+      zoom.addEventListener("input", () => {
+        state.zoomIdx = parseInt(zoom.value, 10);
+        rebuild();
+      });
+      contrast.addEventListener("input", () => {
+        state.contrast = parseInt(contrast.value, 10) / 100;
+        // contrast affects draw curve only
+        draw();
+      });
+
+      // Randomize
+      const randomize = () => {
+        state.seed = (Math.random() * 1e9) | 0;
+        rebuild();
+        toast("New map generated");
+      };
+      document.getElementById("randomize").addEventListener("click", randomize);
+
+      // Focus demo helper
+      document.getElementById("focusDemo").addEventListener("click", () => {
+        state.zoomIdx = 3; zoom.value = 3;
+        state.loops = true; setToggle(tglLoops, true);
+        state.norm = true; setToggle(tglNorm, true);
+        contrast.value = 66; state.contrast = 0.66;
+        rebuild();
+        document.getElementById("demo").scrollIntoView({behavior: prefersReduced ? "auto" : "smooth", block:"start"});
+        toast("Set to domain→loop viewing mode");
+      });
+
+      // Quiz
+      const wireQuiz = (cardEl, resultEl, correctText) => {
+        const opts = [...cardEl.querySelectorAll(".opt")];
+        let answered = false;
+        opts.forEach(btn => btn.addEventListener("click", () => {
+          if (answered) return;
+          answered = true;
+          const isWrong = btn.getAttribute("data-correct") === "1";
+          opts.forEach(b => {
+            const wrong = b.getAttribute("data-correct") === "1";
+            b.classList.add(wrong ? "bad" : "good");
+          });
+          if (isWrong){
+            resultEl.innerHTML = `Not quite. ${correctText}`;
+          }else{
+            resultEl.innerHTML = `✅ Yep. ${correctText}`;
+          }
+        }));
+      };
+
+      wireQuiz(
+        document.querySelectorAll(".quizCard")[0],
+        document.getElementById("r1"),
+        "A bright off-diagonal punctum is a classic visual cue for a focal interaction (a loop)."
+      );
+      wireQuiz(
+        document.querySelectorAll(".quizCard")[1],
+        document.getElementById("r2"),
+        "If coverage can’t support that bin size, zoom out. Coarser bins often reveal cleaner, more trustworthy structure."
+      );
+
+      // Hotkeys
+      window.addEventListener("keydown", (e) => {
+        if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+        if (e.key.toLowerCase() === "n") flipNorm();
+        if (e.key.toLowerCase() === "l") flipLoops();
+        if (e.key.toLowerCase() === "r") randomize();
+      });
+
+      // Kick off
+      rebuild();
+    })();
+  </script>
+</body>
+</html>
